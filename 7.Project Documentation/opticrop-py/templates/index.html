@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Crop Recommendation Engine{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- Hero card -->
+  <div class="col-12">
+    <div class="hero-card p-4 rounded-4 mb-2">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h2 class="fw-bold mb-1">Find the Best Crop for Your Field</h2>
+          <p class="mb-0 text-secondary">Enter your soil &amp; climate data — our Random Forest model evaluates 22 crops and returns the best match in milliseconds.</p>
+        </div>
+        <div class="col-md-4 text-end d-none d-md-block">
+          <span style="font-size:4rem">🌾</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendation form -->
+  <div class="col-lg-7" id="predict-form">
+    <div class="card shadow-sm border-0 rounded-4 h-100">
+      <div class="card-header border-0 bg-transparent pt-4 pb-0 px-4">
+        <h5 class="fw-semibold mb-0"><i class="bi bi-sliders me-2 text-success"></i>Soil &amp; Climate Parameters</h5>
+        <p class="text-muted small mb-0">Adjust all 7 parameters to match your field conditions</p>
+      </div>
+      <div class="card-body px-4 pb-4">
+        <form method="POST" action="{{ url_for('predict') }}" id="predictForm">
+
+          {% set params = [
+            ("N",           "Nitrogen (N)",      "kg/ha", 0, 200, 90,   "Available nitrogen content"),
+            ("P",           "Phosphorus (P)",     "kg/ha", 0, 150, 42,   "Available phosphorus content"),
+            ("K",           "Potassium (K)",      "kg/ha", 0, 210, 43,   "Available potassium content"),
+            ("ph",          "Soil pH",            "",      3, 10,  6.5,  "Soil acidity / alkalinity"),
+            ("temperature", "Temperature",        "°C",    5, 50,  26,   "Average ambient temperature"),
+            ("humidity",    "Humidity",           "%",     10,100, 70,   "Relative humidity percentage"),
+            ("rainfall",    "Rainfall",           "mm",    20,400, 200,  "Average annual rainfall"),
+          ] %}
+
+          {% for name, label, unit, lo, hi, default, hint in params %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label for="{{ name }}" class="form-label mb-0 fw-medium">{{ label }}</label>
+              <div class="input-group input-group-sm" style="width:110px">
+                <input type="number" class="form-control form-control-sm text-center"
+                       id="{{ name }}_num" name="{{ name }}"
+                       value="{{ default }}" min="{{ lo }}" max="{{ hi }}"
+                       step="{{ 0.1 if name in ('ph',) else 1 }}" required />
+                {% if unit %}<span class="input-group-text bg-light">{{ unit }}</span>{% endif %}
+              </div>
+            </div>
+            <input type="range" class="form-range param-range"
+                   id="{{ name }}_range"
+                   min="{{ lo }}" max="{{ hi }}" step="{{ 0.1 if name in ('ph',) else 1 }}"
+                   value="{{ default }}"
+                   data-target="{{ name }}_num"/>
+            <div class="form-text text-muted" style="font-size:0.75rem">{{ hint }} · range: {{ lo }}–{{ hi }}{% if unit %} {{ unit }}{% endif %}</div>
+          </div>
+          {% endfor %}
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-success px-4 fw-semibold flex-grow-1">
+              <i class="bi bi-magic me-2"></i>Get Crop Recommendation
+            </button>
+            <button type="reset" class="btn btn-outline-secondary px-3">
+              <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick presets + info panel -->
+  <div class="col-lg-5">
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+      <div class="card-header border-0 bg-transparent pt-4 pb-0 px-4">
+        <h6 class="fw-semibold mb-0"><i class="bi bi-lightning me-2 text-warning"></i>Quick Presets</h6>
+      </div>
+      <div class="card-body px-4 pb-4">
+        <p class="text-muted small">Load typical values for common scenarios</p>
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-sm btn-outline-success preset-btn"
+            data-vals='{"N":90,"P":42,"K":43,"ph":6.2,"temperature":24,"humidity":83,"rainfall":210}'>
+            🌾 Paddy Field
+          </button>
+          <button class="btn btn-sm btn-outline-success preset-btn"
+            data-vals='{"N":12,"P":120,"K":175,"ph":6.0,"temperature":14,"humidity":92,"rainfall":118}'>
+            🍎 Cool Highlands
+          </button>
+          <button class="btn btn-sm btn-outline-success preset-btn"
+            data-vals='{"N":110,"P":50,"K":25,"ph":7.2,"temperature":28,"humidity":60,"rainfall":80}'>
+            🌿 Cotton Belt
+          </button>
+          <button class="btn btn-sm btn-outline-success preset-btn"
+            data-vals='{"N":20,"P":60,"K":60,"ph":7.0,"temperature":18,"humidity":70,"rainfall":45}'>
+            🫘 Legume Fields
+          </button>
+          <button class="btn btn-sm btn-outline-success preset-btn"
+            data-vals='{"N":100,"P":55,"K":52,"ph":5.8,"temperature":30,"humidity":88,"rainfall":165}'>
+            🍌 Tropical Orchard
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+      <div class="card-header border-0 bg-transparent pt-4 pb-0 px-4">
+        <h6 class="fw-semibold mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>About the Model</h6>
+      </div>
+      <div class="card-body px-4 pb-4">
+        <ul class="list-unstyled small text-secondary mb-0">
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i><strong>Algorithm:</strong> Random Forest Classifier (200 trees)</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i><strong>Crops:</strong> 22 varieties across all major categories</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i><strong>Parameters:</strong> N, P, K, pH, Temperature, Humidity, Rainfall</li>
+          <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i><strong>Training:</strong> 2,640 samples (120/crop)</li>
+          <li><i class="bi bi-check2-circle text-success me-2"></i><strong>Output:</strong> Top-5 ranked crops with confidence %</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Sync sliders ↔ number inputs
+document.querySelectorAll('.param-range').forEach(range => {
+  const numInput = document.getElementById(range.dataset.target);
+  range.addEventListener('input', () => { numInput.value = range.value; });
+  numInput.addEventListener('input', () => { range.value = numInput.value; });
+});
+
+// Presets
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const vals = JSON.parse(btn.dataset.vals);
+    Object.entries(vals).forEach(([k, v]) => {
+      const num   = document.getElementById(k + '_num');
+      const range = document.getElementById(k + '_range');
+      if (num)   num.value   = v;
+      if (range) range.value = v;
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Results — {{ results[0].label if results else 'Recommendation' }}{% endblock %}
+{% block page_title %}Recommendation Results{% endblock %}
+
+{% block content %}
+<!-- Top recommendation banner -->
+{% if results %}
+{% set top = results[0] %}
+<div class="result-hero rounded-4 p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+  <div class="d-flex align-items-center gap-3">
+    <div class="crop-emoji-lg">{{ top.emoji }}</div>
+    <div>
+      <div class="text-muted small fw-medium mb-1">🏆 Best Match</div>
+      <h2 class="fw-bold mb-0">{{ top.label }}</h2>
+      <p class="mb-0 text-secondary">{{ top.desc }}</p>
+    </div>
+  </div>
+  <div class="text-center">
+    <div class="confidence-ring">
+      <svg viewBox="0 0 80 80" width="80" height="80">
+        <circle cx="40" cy="40" r="34" fill="none" stroke="#e9ecef" stroke-width="8"/>
+        <circle cx="40" cy="40" r="34" fill="none" stroke="#40916c" stroke-width="8"
+                stroke-dasharray="{{ (top.score / 100 * 213.6)|round(1) }} 213.6"
+                stroke-dashoffset="53.4"
+                stroke-linecap="round"/>
+        <text x="40" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#1b4332">{{ top.score }}%</text>
+      </svg>
+      <div class="small text-muted mt-1">Confidence</div>
+    </div>
+  </div>
+</div>
+
+<!-- Input summary -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+  <div class="card-body px-4 py-3">
+    <h6 class="fw-semibold mb-3"><i class="bi bi-sliders me-2 text-success"></i>Your Input Parameters</h6>
+    <div class="row g-2">
+      {% set labels = {"N":"Nitrogen","P":"Phosphorus","K":"Potassium","ph":"pH","temperature":"Temperature","humidity":"Humidity","rainfall":"Rainfall"} %}
+      {% set units  = {"N":"kg/ha","P":"kg/ha","K":"kg/ha","ph":"","temperature":"°C","humidity":"%","rainfall":"mm"} %}
+      {% for k, v in inputs.items() %}
+      <div class="col-6 col-sm-4 col-md-3 col-xl-auto">
+        <div class="param-chip">
+          <div class="param-chip-label">{{ labels[k] }}</div>
+          <div class="param-chip-val">{{ v }}{% if units[k] %} <small>{{ units[k] }}</small>{% endif %}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- All 5 results -->
+<h5 class="fw-semibold mb-3">Top 5 Crop Matches</h5>
+<div class="row g-3">
+  {% for r in results %}
+  <div class="col-12">
+    <div class="card border-0 shadow-sm rounded-4 result-card {% if loop.first %}result-card-top{% endif %}">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rank-badge">#{{ loop.index }}</div>
+            <div class="crop-emoji">{{ r.emoji }}</div>
+            <div>
+              <h6 class="fw-bold mb-0">{{ r.label }}</h6>
+              <div class="text-muted small">{{ r.desc }}</div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div>
+              <div class="progress result-progress mb-1">
+                <div class="progress-bar bg-success" style="width:{{ r.score }}%"></div>
+              </div>
+              <div class="text-end small fw-semibold text-success">{{ r.score }}% match</div>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#detail-{{ loop.index }}">
+              <i class="bi bi-chevron-down"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Expandable detail -->
+        <div class="collapse mt-3" id="detail-{{ loop.index }}">
+          <div class="row g-3 pt-2 border-top">
+            <div class="col-sm-6 col-md-4">
+              <div class="info-chip"><i class="bi bi-calendar3 text-success me-2"></i><strong>Season:</strong> {{ r.season }}</div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+              <div class="info-chip"><i class="bi bi-graph-up text-success me-2"></i><strong>Yield:</strong> {{ r.yield }}</div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+              <div class="info-chip"><i class="bi bi-layers text-success me-2"></i><strong>Soil:</strong> {{ r.soil }}</div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+              <div class="info-chip"><i class="bi bi-droplet text-success me-2"></i><strong>Fertilizer:</strong> {{ r.fertilizer }}</div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+              <div class="info-chip"><i class="bi bi-bug text-success me-2"></i><strong>Pests:</strong> {{ r.pests }}</div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+              <div class="info-chip"><i class="bi bi-shop text-success me-2"></i><strong>Market:</strong> {{ r.use }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="mt-4 d-flex gap-2 flex-wrap">
+  <a href="{{ url_for('index') }}" class="btn btn-success px-4">
+    <i class="bi bi-arrow-left me-2"></i>Try Another
+  </a>
+  <a href="{{ url_for('crop_info') }}" class="btn btn-outline-secondary px-4">
+    <i class="bi bi-book me-2"></i>Crop Database
+  </a>
+</div>
+{% endif %}
+{% endblock %}

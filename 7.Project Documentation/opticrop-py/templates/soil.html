@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Soil Analysis{% endblock %}
+{% block page_title %}Soil Analysis Log{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- Form -->
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-header border-0 bg-transparent pt-4 pb-0 px-4">
+        <h5 class="fw-semibold mb-0"><i class="bi bi-plus-circle me-2 text-success"></i>Add Soil Analysis</h5>
+      </div>
+      <div class="card-body px-4 pb-4">
+        <form method="POST" action="{{ url_for('soil') }}">
+          <div class="mb-3">
+            <label class="form-label fw-medium">Field Name <span class="text-danger">*</span></label>
+            <input type="text" name="field_name" class="form-control" placeholder="e.g. North Meadow Block A" required/>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-4">
+              <label class="form-label fw-medium">N (kg/ha)</label>
+              <input type="number" name="N" class="form-control" placeholder="0" min="0" max="300" step="0.1"/>
+            </div>
+            <div class="col-4">
+              <label class="form-label fw-medium">P (kg/ha)</label>
+              <input type="number" name="P" class="form-control" placeholder="0" min="0" max="200" step="0.1"/>
+            </div>
+            <div class="col-4">
+              <label class="form-label fw-medium">K (kg/ha)</label>
+              <input type="number" name="K" class="form-control" placeholder="0" min="0" max="300" step="0.1"/>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-medium">pH</label>
+              <input type="number" name="ph" class="form-control" placeholder="7.0" min="0" max="14" step="0.1"/>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-medium">Organic Matter (%)</label>
+              <input type="number" name="organic_matter" class="form-control" placeholder="0.0" min="0" max="20" step="0.01"/>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Notes</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="Any observations…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-success w-100 fw-semibold">
+            <i class="bi bi-save me-2"></i>Save Analysis
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log table -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-header border-0 bg-transparent pt-4 pb-0 px-4 d-flex justify-content-between align-items-center">
+        <h5 class="fw-semibold mb-0"><i class="bi bi-table me-2 text-success"></i>Analysis Records</h5>
+        <span class="badge bg-success-subtle text-success border border-success-subtle">{{ analyses|length }} records</span>
+      </div>
+      <div class="card-body px-4 pb-4">
+        {% if analyses %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Field</th>
+                <th class="text-center">N</th>
+                <th class="text-center">P</th>
+                <th class="text-center">K</th>
+                <th class="text-center">pH</th>
+                <th class="text-center">OM %</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in analyses %}
+              <tr>
+                <td><strong>{{ a.field_name }}</strong><br/><small class="text-muted">{{ a.notes or '' }}</small></td>
+                <td class="text-center">{{ a.N or '—' }}</td>
+                <td class="text-center">{{ a.P or '—' }}</td>
+                <td class="text-center">{{ a.K or '—' }}</td>
+                <td class="text-center">
+                  <span class="badge rounded-pill {% if a.ph and a.ph < 6 %}bg-warning text-dark{% elif a.ph and a.ph > 7.5 %}bg-danger{% else %}bg-success{% endif %}">
+                    {{ a.ph or '—' }}
+                  </span>
+                </td>
+                <td class="text-center">{{ a.organic_matter or '—' }}</td>
+                <td><small class="text-muted">{{ a.created_at[:10] if a.created_at else '—' }}</small></td>
+                <td>
+                  <form method="POST" action="{{ url_for('delete_soil', record_id=a.id) }}" onsubmit="return confirm('Delete this record?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <div style="font-size:3rem">🔬</div>
+          <p class="mt-2">No soil analyses yet. Add your first record.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
