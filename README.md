@@ -24,7 +24,14 @@ Layer Technology Machine Learning Python, Scikit-learn, Pandas, NumPy Model Rand
 
 This repository documents the project across its full development lifecycle:
 
-├── 1.Brainstorming & Ideation/ # Problem statement, idea generation ├── 2.Requirement Analysis/ # Functional & non-functional requirements ├── 3.Project Design Phase/ # Data flow diagrams, architecture, UI design ├── 4.Project Planning Phase/ # Sprint/milestone planning ├── 5.Project Development Phase/ # Model training notebooks & app code ├── 6.Project Testing/ # Test cases and validation results ├── 7.Project Documentation/ # Final project report and supporting docs ├── 8.Project Demonstration/ # Demo video / screenshots └── README.md
+├── 1.Brainstorming & Ideation/ # Problem statement, idea generation 
+├── 2.Requirement Analysis/ # Functional & non-functional requirements 
+├── 3.Project Design Phase/ # Data flow diagrams, architecture, UI design
+├── 4.Project Planning Phase/ # Sprint/milestone planning 
+├── 5.Project Development Phase/ # Model training notebooks & app code
+├── 6.Project Testing/ # Test cases and validation results 
+├── 7.Project Documentation/ # Final project report and supporting docs
+├── 8.Project Demonstration/ # Demo video / screenshots └── README.md
 
 
 Note
