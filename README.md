@@ -18,7 +18,9 @@ The project follows a structured Software Development Life Cycle (SDLC) approach
 
 Layer Technology Machine Learning Python, Scikit-learn, Pandas, NumPy Model Random Forest Classifier Backend Flask Frontend HTML5, CSS3, JavaScript Database SQLite Deployment Render Version Control Git & GitHub
 
-🌐 Demo Video 🔗 demo link here : https://drive.google.com/file/d/18onXFq2e8eXrdYUwgixXhqKgQADNo4VY/view?usp=drive_link
+🌐 Demo Video 
+
+🔗 demo link here : https://drive.google.com/file/d/18onXFq2e8eXrdYUwgixXhqKgQADNo4VY/view?usp=drive_link
 
 ✨Repository Structure
 
